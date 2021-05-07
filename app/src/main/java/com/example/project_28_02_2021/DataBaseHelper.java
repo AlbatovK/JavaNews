@@ -40,7 +40,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+    public void onUpgrade(SQLiteDatabase db_db, int oldVersion, int newVersion) {}
 
     public ArrayList<Site> getSites() {
         Cursor cursor = getReadableDatabase().rawQuery("select name, url from sites_table", null);
