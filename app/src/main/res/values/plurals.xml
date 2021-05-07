@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="day_plurals">
+        <item quantity="one"> день назад</item>
+        <item quantity="two"> дня назад</item>
+        <item quantity="few"> дня назад</item>
+        <item quantity="many"> дней назад</item>
+        <item quantity="other"> дней назад</item>
+    </plurals>
+
+    <plurals name="hour_plurals">
+        <item quantity="one"> час назад</item>
+        <item quantity="two"> часа назад</item>
+        <item quantity="few"> часа назад</item>
+        <item quantity="many"> часов назад</item>
+        <item quantity="other"> часов назад</item>
+    </plurals>
+
+    <plurals name="min_plurals">
+        <item quantity="one"> минуту назад</item>
+        <item quantity="two"> минуты назад</item>
+        <item quantity="few"> минуты назад</item>
+        <item quantity="many"> минут назад</item>
+        <item quantity="other"> минут назад</item>
+    </plurals>
+
+    <plurals name="sec_plurals">
+        <item quantity="one"> секунду назад</item>
+        <item quantity="two"> секунды назад</item>
+        <item quantity="few"> секунды назад</item>
+        <item quantity="many"> секунд назад</item>
+        <item quantity="other"> секунд назад</item>
+    </plurals>
+
+    <plurals name="items_plurals">
+        <item quantity="one"> статья загружена</item>
+        <item quantity="two"> статьи загружены</item>
+        <item quantity="few"> статьи загружены</item>
+        <item quantity="many"> статей загружено</item>
+        <item quantity="other"> статей загружено</item>
+    </plurals>
+
+    <plurals name="sites_plurals">
+        <item quantity="one"> сайта</item>
+        <item quantity="two"> сайтов</item>
+        <item quantity="few"> сайтов</item>
+        <item quantity="many"> сайтов</item>
+        <item quantity="other"> сайтов</item>
+    </plurals>
+
+</resources>

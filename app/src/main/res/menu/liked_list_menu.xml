@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/liked_share"
+        android:orderInCategory="1"
+        android:title="@string/str_menu_share" />
+    <item
+        android:id="@+id/delete_liked_item"
+        android:orderInCategory="2"
+        android:title="@string/str_delete_liked" />
+</menu>
