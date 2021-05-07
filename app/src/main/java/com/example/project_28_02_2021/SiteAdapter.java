@@ -40,14 +40,13 @@ public class SiteAdapter extends ArrayAdapter<Site> {
     }
 
     private void picIntoViewByLink(String link, ImageView view) {
-        final String f_str = "Done";
-        if (f_str.equalsIgnoreCase((String) view.getContentDescription())) {
+        if (!"Done".contentEquals(view.getContentDescription())) {
         Context context = getContext();
         context.getAssets();
         view.setImageResource(R.drawable.rss_icon);
         try { Picasso.with(context).load(link).error(R.drawable.rss_icon).into(view); }
         catch (Exception e) { view.setImageResource(R.drawable.rss_icon); }
-        view.setContentDescription(f_str);
+        view.setContentDescription("Done");
         }
     }
 
@@ -61,6 +60,7 @@ public class SiteAdapter extends ArrayAdapter<Site> {
         } else { viewHolder = (SiteAdapter.ViewHolder) convertView.getTag(); }
         Site item = items.get(pos);
         picIntoViewByLink(item.getImageLink(), viewHolder.site_icon);
+        
         viewHolder.infoView.setText(item.asString());
         viewHolder.quantity_view.setText(
                 getContext().getString(R.string.str_items_count,
