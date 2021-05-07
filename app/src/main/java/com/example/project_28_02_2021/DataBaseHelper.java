@@ -16,6 +16,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             = "delete from sites_table where name = '%s';";
     public static String addQuery
             = "insert into sites_table values ('%s', '%s');";
+    public static String selectQuery
+            = "select name, url from sites_table";
     public static String createQuery
             = "create table sites_table\n(\n    name text not null,\n    url  text not null\n);";
 
@@ -40,10 +42,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db_db, int oldVersion, int newVersion) {}
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 
     public ArrayList<Site> getSites() {
-        Cursor cursor = getReadableDatabase().rawQuery("select name, url from sites_table", null);
+        Cursor cursor = getReadableDatabase().rawQuery(selectQuery, null);
         ArrayList<Site> sites = new ArrayList<>();
         while (cursor.moveToNext()) {
             int nameId = cursor.getColumnIndex("name");
