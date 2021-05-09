@@ -2,8 +2,10 @@ package com.example.project_28_02_2021;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Patterns;
@@ -25,6 +27,7 @@ import androidx.work.WorkManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
@@ -50,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
     private static boolean                  created           = false;
 
     private void setDefaultSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+        }
         SharedPreferences settings = getSharedPreferences(PreferenceManager.SETTINGS_NAME, MODE_MULTI_PROCESS);
         SwipeRefreshLayout.OnRefreshListener listener = () -> {
             Runnable refresher = () -> {
@@ -117,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 StringBuilder tmp_str = new StringBuilder();
                 Scanner in_scan = new Scanner(in_stream);
                 while (in_scan.hasNext()) { tmp_str.append(in_scan.next()); }
-                org.jsoup.nodes.Document doc = Jsoup.parse(tmp_str.toString(), " ", Parser.xmlParser());
+                Document doc = Jsoup.parse(tmp_str.toString(), " ", Parser.xmlParser());
                 tags = doc.select("tag").text().split(" ");
             } catch (Exception ignored) {}
 
