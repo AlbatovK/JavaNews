@@ -53,7 +53,7 @@ class RssParser extends Thread {
                                     notRead = false;
                                 }
                             }
-                        if (notRead) {
+                        if (notRead && !NewsRssItem.getNews().contains(newsRssItem)) {
                             NewsRssItem.getNews().add(newsRssItem);
                         }
                     }

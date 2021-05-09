@@ -52,7 +52,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             int urlId = cursor.getColumnIndex("url");
             String name = cursor.getString(nameId);
             String url = cursor.getString(urlId);
-            sites.add(new Site(name, url, context));
+            Site site = new Site(name, url, context);
+            if (!Site.getSites().contains(site)) { sites.add(site); }
         }
         cursor.close();
         return sites;
