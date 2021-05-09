@@ -47,13 +47,20 @@ class RssParser extends Thread {
                                 doc.select("url").text(),
                                 context);
                         boolean notRead = true;
-                            Elements items = readDoc.select("item");
-                            for (Element elem : items) {
-                                if (elem.select("title").text().equalsIgnoreCase(newsRssItem.getTitle().replace(" ", ""))) {
-                                    notRead = false;
-                                }
+                        Elements items = readDoc.select("item");
+                        for (Element elem : items) {
+                            if (elem.select("title").text().equalsIgnoreCase(newsRssItem.getTitle().replace(" ", ""))) {
+                                notRead = false;
                             }
-                        if (notRead && !NewsRssItem.getNews().contains(newsRssItem)) {
+                        }
+                        boolean notAgain = true;
+                        for (NewsRssItem rssItem : NewsRssItem.getNews()) {
+                            if (rssItem.getTitle().equals(newsRssItem.getTitle())) {
+                                notAgain = false;
+                                break;
+                            }
+                        }
+                        if (notRead && notAgain) {
                             NewsRssItem.getNews().add(newsRssItem);
                         }
                     }
