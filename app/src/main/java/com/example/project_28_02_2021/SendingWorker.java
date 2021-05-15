@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -82,6 +83,7 @@ public class SendingWorker extends Worker {
         try {
             if (channel != null) notificationManager.createNotificationChannel(channel);
         } catch (Exception ignored) {}
+        Log.println(Log.ASSERT, items.get(0).getTitle(), "!!!");
         Intent shareIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(items.get(0).getLink()));
         PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, shareIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "id")

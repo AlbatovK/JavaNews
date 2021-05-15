@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
         PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(SendingWorker.class, 15, TimeUnit.MINUTES).
                 setInitialDelay(15, TimeUnit.MINUTES).build();
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork("id", ExistingPeriodicWorkPolicy.REPLACE, request);
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork("id_work", ExistingPeriodicWorkPolicy.REPLACE, request);
 
         listView = findViewById(R.id.list_view);
         refreshLayout = findViewById(R.id.swipe);
