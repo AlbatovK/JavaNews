@@ -13,4 +13,13 @@
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#52000000</color>
     <color name="grey">#52000000</color>
+
+    <color name="color_1">#494949</color>
+    <!--<color name="color_2"></color>
+    <color name="color_3"></color>
+    <color name="color_4">#F11111111</color>
+    <color name="color_5"></color>
+    <color name="color_6"></color>
+    <color name="color_7"></color> -->
+
 </resources>
