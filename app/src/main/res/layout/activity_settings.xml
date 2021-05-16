@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:autofillHints=""
         android:ems="10"
+        android:fontFamily="serif"
         android:hint="@string/str_enter_tags"
         android:inputType="textPersonName"
         app:layout_constraintStart_toStartOf="@+id/textView5"
@@ -23,6 +24,7 @@
         android:layout_width="150dp"
         android:layout_height="40dp"
         android:layout_marginTop="16dp"
+        android:fontFamily="serif"
         android:text="@string/str_settings_site_list"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="@+id/input_tags"
@@ -32,6 +34,8 @@
         android:id="@+id/textView5"
         android:layout_width="200dp"
         android:layout_height="30dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="serif"
         android:text="@string/str_tags"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="@+id/mode_list"
@@ -44,6 +48,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
+        android:fontFamily="serif"
         android:text="@string/str_sort_hint"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,6 +58,7 @@
         android:id="@+id/textView"
         android:layout_width="200dp"
         android:layout_height="30dp"
+        android:fontFamily="serif"
         android:text="@string/str_filter"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="@+id/sort_list"
@@ -71,7 +77,7 @@
             android:layout_width="120dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:fontFamily="sans-serif-light"
+            android:fontFamily="serif"
             android:text="@string/str_sort_by_site_settings"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -79,7 +85,7 @@
             android:id="@+id/sort_by_date_button"
             android:layout_width="120dp"
             android:layout_height="match_parent"
-            android:fontFamily="sans-serif-light"
+            android:fontFamily="serif"
             android:text="@string/sort_by_date_settings"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -87,7 +93,7 @@
             android:id="@+id/sort_by_size_button"
             android:layout_width="120dp"
             android:layout_height="match_parent"
-            android:fontFamily="sans-serif-light"
+            android:fontFamily="serif"
             android:text="@string/str_sort_by_size_settings"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -106,7 +112,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="sans-serif-light"
+            android:fontFamily="serif"
+            android:includeFontPadding="false"
             android:text="@string/str_filter_by_tag"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
@@ -115,7 +122,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="sans-serif-light"
+            android:fontFamily="serif"
             android:text="@string/str_no_filter"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
     </RadioGroup>
