@@ -27,7 +27,7 @@ public class Site {
     public static class SiteFactory {
         public static Site getSiteByName(String name, Context context) {
             for (Site site : sites) { if (site.name.equals(name)) { return site; } }
-            return new Site(name, "Неизвестно", context);
+            return new Site(name, "?", context);
         }
     }
 
