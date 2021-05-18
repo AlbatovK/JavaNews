@@ -36,8 +36,11 @@ public class SplashActivity extends AppCompatActivity {
         ArrayList<String> exe_rows = new ArrayList<>();
         try (InputStream inputStream = assetManager.open("sites_table.sql")) {
             Scanner scanner = new Scanner(inputStream);
-            while (scanner.hasNext()) { exe_rows.add(scanner.nextLine()); }
-        } catch (IOException ignored) {}
+            while (scanner.hasNext()) {
+                exe_rows.add(scanner.nextLine());
+            }
+        } catch (IOException ignored) {
+        }
         DataBaseHelper dataBaseHelper = new DataBaseHelper(getApplicationContext(), exe_rows);
         dataBaseHelper.getReadableDatabase();
         Site.getSites().addAll(dataBaseHelper.getSites());
@@ -50,8 +53,13 @@ public class SplashActivity extends AppCompatActivity {
                 for (Site site : Site.getSites()) {
                     RssParser parser = new RssParser(site, getApplicationContext());
                     parser.start();
-                    try { while (site.getStatus() == Site.SiteStatusStates.UNFILLED_STATE) { Thread.sleep(100); } }
-                    catch (InterruptedException ignored) { site.setStatus(Site.SiteStatusStates.UNKNOWN_STATE); }
+                    try {
+                        while (site.getStatus() == Site.SiteStatusStates.UNFILLED_STATE) {
+                            Thread.sleep(100);
+                        }
+                    } catch (InterruptedException ignored) {
+                        site.setStatus(Site.SiteStatusStates.UNKNOWN_STATE);
+                    }
                     bar.post(() -> bar.incrementProgressBy(1));
                 }
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);

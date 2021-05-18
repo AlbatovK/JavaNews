@@ -44,7 +44,9 @@ public class LikedNewsActivity extends AppCompatActivity {
             deleteFile("news.xml");
             setDefaultSettings();
             return true;
-        } else { return super.onOptionsItemSelected(item); }
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -71,12 +73,15 @@ public class LikedNewsActivity extends AppCompatActivity {
                             (dialog, which) -> closeOptionsMenu())
                     .setPositiveButton(R.string.str_delete_site,
                             (dialog, which) -> {
-                                NewsRssItem removedItem =  NewsRssItem.getLikedNews().get(info.position);
+                                NewsRssItem removedItem = NewsRssItem.getLikedNews().get(info.position);
                                 StringBuilder gotXml = new StringBuilder();
                                 try (InputStream inputStream = openFileInput("news.xml")) {
                                     Scanner scanner = new Scanner(inputStream);
-                                    while (scanner.hasNext()) { gotXml.append(scanner.nextLine()); }
-                                } catch (IOException ignored) {}
+                                    while (scanner.hasNext()) {
+                                        gotXml.append(scanner.nextLine());
+                                    }
+                                } catch (IOException ignored) {
+                                }
                                 deleteFile("news.xml");
                                 Document doc = Jsoup.parse(gotXml.toString(), "", Parser.xmlParser());
                                 Elements items = doc.select("item");
@@ -84,17 +89,24 @@ public class LikedNewsActivity extends AppCompatActivity {
                                 String root = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
                                 String startTag = "<items>";
                                 String endTag = "</items>";
-                                try {for (Element docItem : items) {
-                                       if (docItem.select("title").text().equals(removedItem.getTitle())) { continue; }
-                                        resXml.append(docItem.toString()); }
-                                } catch (Exception ignored) {}
+                                try {
+                                    for (Element docItem : items) {
+                                        if (docItem.select("title").text().equals(removedItem.getTitle())) {
+                                            continue;
+                                        }
+                                        resXml.append(docItem.toString());
+                                    }
+                                } catch (Exception ignored) {
+                                }
                                 String res = root + startTag + resXml.toString() + endTag;
-                                try { openFileOutput("news.xml", MODE_APPEND).write(res.getBytes()); }
-                                catch (IOException ignored) {}
+                                try {
+                                    openFileOutput("news.xml", MODE_APPEND).write(res.getBytes());
+                                } catch (IOException ignored) {
+                                }
                                 NewsRssItem.getLikedNews().remove(info.position);
                                 listView.setAdapter(new NewsRssItemAdapter(this,
                                         R.layout.list_item_layout, NewsRssItem.getLikedNews(), false));
-                               })
+                            })
                     .create();
             alertDialog.show();
         }
@@ -105,16 +117,19 @@ public class LikedNewsActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PreferenceManager.SETTINGS_NAME, MODE_MULTI_PROCESS);
         AdapterView.OnItemClickListener itemListener =
                 (parent, view, position, id) -> startActivity(new Intent(Intent.ACTION_VIEW,
-                Uri.parse(NewsRssItem.getLikedNews().get(position).getLink())));
+                        Uri.parse(NewsRssItem.getLikedNews().get(position).getLink())));
         listView.setOnItemClickListener(itemListener);
         Comparator<NewsRssItem> defaultComparator;
         switch (settings.getString(PreferenceManager.SORT_KEY, PreferenceManager.SORT_BY_DATE)) {
             case PreferenceManager.SORT_BY_DATE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_DATE); break;
+                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_DATE);
+                break;
             case PreferenceManager.SORT_BY_SITE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SITE); break;
+                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SITE);
+                break;
             case PreferenceManager.SORT_BY_SIZE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SIZE); break;
+                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SIZE);
+                break;
             default:
                 defaultComparator = (n_1, n_2) -> 0;
         }
@@ -128,7 +143,9 @@ public class LikedNewsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_liked_news_activity);
         ActionBar bar = getSupportActionBar();
-        if (bar != null) { bar.setDisplayHomeAsUpEnabled(true); }
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
         listView = findViewById(R.id.liked_news_list);
         setDefaultSettings();
         registerForContextMenu(listView);

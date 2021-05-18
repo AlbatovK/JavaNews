@@ -44,13 +44,14 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
-    private NewsRssItemAdapter              adapter           = null;
-    private DataBaseHelper                  dataBaseHelper     = null;
-    private ListView                        listView          = null;
-    private SwipeRefreshLayout              refreshLayout     = null;
-    private Comparator<NewsRssItem>         defaultComparator = null;
-    private AdapterView.OnItemClickListener itemListener      = (parent, view, position, id) -> {};
-    private static boolean                  created           = false;
+    private NewsRssItemAdapter adapter = null;
+    private DataBaseHelper dataBaseHelper = null;
+    private ListView listView = null;
+    private SwipeRefreshLayout refreshLayout = null;
+    private Comparator<NewsRssItem> defaultComparator = null;
+    private AdapterView.OnItemClickListener itemListener = (parent, view, position, id) -> {
+    };
+    private static boolean created = false;
 
     private void setDefaultSettings() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -60,31 +61,46 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PreferenceManager.SETTINGS_NAME, MODE_MULTI_PROCESS);
         SwipeRefreshLayout.OnRefreshListener listener = () -> {
             Runnable refresher = () -> {
-                listView.setOnItemClickListener((parent, view, position, id) -> {});
-                itemListener = (parent, view, position, id) -> {};
+                listView.setOnItemClickListener((parent, view, position, id) -> {
+                });
+                itemListener = (parent, view, position, id) -> {
+                };
                 listView.post(() -> {
                     listView.setOnItemClickListener(itemListener);
                     setTitle(R.string.str_wait);
                 });
-                 listView.post(() -> adapter.notifyDataSetChanged());
-                 if (!adapter.isEmpty()) { adapter.clear(); }
-                 if (!Site.getSites().isEmpty()) { Site.getSites().clear(); }
-                 if (!NewsRssItem.getNews().isEmpty()) { NewsRssItem.getNews().clear(); }
-                 dataBaseHelper.getReadableDatabase();
-                 Site.getSites().addAll(dataBaseHelper.getSites());
-                 for (Site site : Site.getSites()) {
-                     RssParser parser = new RssParser(site, this);
-                     parser.start();
-                try { while (site.getStatus() == Site.SiteStatusStates.UNFILLED_STATE) { Thread.sleep(100); } }
-                catch (InterruptedException ignored) { site.setStatus(Site.SiteStatusStates.UNKNOWN_STATE); }
+                listView.post(() -> adapter.notifyDataSetChanged());
+                if (!adapter.isEmpty()) {
+                    adapter.clear();
                 }
-                if (NewsRssItem.getNews().isEmpty()) { Snackbar.make(listView,
-                        getString(R.string.str_net_exception), Snackbar.LENGTH_LONG).show(); }
-                else { String message = getString(R.string.str_upload_news_data, NewsRssItem.getNews().size(),
-                        getApplicationContext().getResources().getQuantityString(R.plurals.items_plurals, NewsRssItem.getNews().size()),
-                        Site.getSites().size(),
-                        getResources().getQuantityString(R.plurals.sites_plurals, Site.getSites().size())
-                );
+                if (!Site.getSites().isEmpty()) {
+                    Site.getSites().clear();
+                }
+                if (!NewsRssItem.getNews().isEmpty()) {
+                    NewsRssItem.getNews().clear();
+                }
+                dataBaseHelper.getReadableDatabase();
+                Site.getSites().addAll(dataBaseHelper.getSites());
+                for (Site site : Site.getSites()) {
+                    RssParser parser = new RssParser(site, this);
+                    parser.start();
+                    try {
+                        while (site.getStatus() == Site.SiteStatusStates.UNFILLED_STATE) {
+                            Thread.sleep(100);
+                        }
+                    } catch (InterruptedException ignored) {
+                        site.setStatus(Site.SiteStatusStates.UNKNOWN_STATE);
+                    }
+                }
+                if (NewsRssItem.getNews().isEmpty()) {
+                    Snackbar.make(listView,
+                            getString(R.string.str_net_exception), Snackbar.LENGTH_LONG).show();
+                } else {
+                    String message = getString(R.string.str_upload_news_data, NewsRssItem.getNews().size(),
+                            getApplicationContext().getResources().getQuantityString(R.plurals.items_plurals, NewsRssItem.getNews().size()),
+                            Site.getSites().size(),
+                            getResources().getQuantityString(R.plurals.sites_plurals, Site.getSites().size())
+                    );
                     Snackbar.make(listView, message, Snackbar.LENGTH_LONG).show();
                 }
                 Collections.sort(NewsRssItem.getNews(), defaultComparator);
@@ -104,11 +120,14 @@ public class MainActivity extends AppCompatActivity {
         refreshLayout.setOnRefreshListener(listener);
         switch (settings.getString(PreferenceManager.SORT_KEY, PreferenceManager.SORT_BY_DATE)) {
             case PreferenceManager.SORT_BY_DATE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_DATE); break;
+                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_DATE);
+                break;
             case PreferenceManager.SORT_BY_SITE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SITE); break;
+                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SITE);
+                break;
             case PreferenceManager.SORT_BY_SIZE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SIZE); break;
+                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SIZE);
+                break;
         }
         Collections.sort(NewsRssItem.getNews(), defaultComparator);
         if (settings.getString(PreferenceManager.FILTER_KEY,
@@ -119,14 +138,20 @@ public class MainActivity extends AppCompatActivity {
                     Uri.parse(NewsRssItem.getNews().get(position).getLink())));
         } else {
             String[] tags = null;
-            try { openFileOutput("tags.xml", MODE_APPEND); } catch (Exception ignored) {}
+            try {
+                openFileOutput("tags.xml", MODE_APPEND);
+            } catch (Exception ignored) {
+            }
             try (InputStream in_stream = openFileInput("tags.xml")) {
                 StringBuilder tmp_str = new StringBuilder();
                 Scanner in_scan = new Scanner(in_stream);
-                while (in_scan.hasNext()) { tmp_str.append(in_scan.next()); }
+                while (in_scan.hasNext()) {
+                    tmp_str.append(in_scan.next());
+                }
                 Document doc = Jsoup.parse(tmp_str.toString(), " ", Parser.xmlParser());
                 tags = doc.select("tag").text().split(" ");
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             assert tags != null;
             ArrayList<NewsRssItem> filteredNews = new ArrayList<>();
@@ -169,36 +194,47 @@ public class MainActivity extends AppCompatActivity {
                     .setIcon(R.drawable.rss_icon)
                     .setView(view)
                     .setPositiveButton(R.string.str_add_site_pos_button, (dialog, which) -> {
-                                EditText nameInput = view.findViewById(R.id.edit_dialog_name_text_view);
-                                EditText addressInput = view.findViewById(R.id.edit_dialog_address_text_view);
-                                String name = nameInput.getText().toString();
-                                String address = addressInput.getText().toString();
-                                Pattern urlPattern = Patterns.WEB_URL;
-                                Matcher matcher = urlPattern.matcher(address.toLowerCase());
-                                if (name.isEmpty() || address.isEmpty() || !matcher.matches()) {
-                                    Toast.makeText(getApplicationContext(),
-                                            getString(R.string.str_invalid_data),
-                                            Toast.LENGTH_LONG).show();
-                                } else {
-                                    AtomicBoolean isValidUrl = new AtomicBoolean(true);
-                                    Runnable checkSite = () -> {
-                                        Looper.prepare();
-                                        try { Jsoup.connect(address).get(); } catch (Exception ignored) {
-                                            isValidUrl.set(false);
-                                            Toast.makeText(getApplicationContext(), getString(R.string.str_invalid_data),
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-                                    };
-                                    Thread checkThread = new Thread(checkSite);
-                                    checkThread.start();
-                                    try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
-                                    if (isValidUrl.get()) { dataBaseHelper.addSite(new Site(name, address, this)); }}})
+                        EditText nameInput = view.findViewById(R.id.edit_dialog_name_text_view);
+                        EditText addressInput = view.findViewById(R.id.edit_dialog_address_text_view);
+                        String name = nameInput.getText().toString();
+                        String address = addressInput.getText().toString();
+                        Pattern urlPattern = Patterns.WEB_URL;
+                        Matcher matcher = urlPattern.matcher(address.toLowerCase());
+                        if (name.isEmpty() || address.isEmpty() || !matcher.matches()) {
+                            Toast.makeText(getApplicationContext(),
+                                    getString(R.string.str_invalid_data),
+                                    Toast.LENGTH_LONG).show();
+                        } else {
+                            AtomicBoolean isValidUrl = new AtomicBoolean(true);
+                            Runnable checkSite = () -> {
+                                Looper.prepare();
+                                try {
+                                    Jsoup.connect(address).get();
+                                } catch (Exception ignored) {
+                                    isValidUrl.set(false);
+                                    Toast.makeText(getApplicationContext(), getString(R.string.str_invalid_data),
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            };
+                            Thread checkThread = new Thread(checkSite);
+                            checkThread.start();
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ignored) {
+                            }
+                            if (isValidUrl.get()) {
+                                dataBaseHelper.addSite(new Site(name, address, this));
+                            }
+                        }
+                    })
                     .setNegativeButton(R.string.str_add_site_neg_button, (dialog, which) -> closeOptionsMenu())
                     .create();
             alertDialog.show();
+        } else if (id == R.id.preferences) {
+            startActivity(new Intent(this, SettingsActivity.class));
+        } else if (id == R.id.liked_items) {
+            startActivity(new Intent(this, LikedNewsActivity.class));
         }
-        else if (id == R.id.preferences) { startActivity(new Intent(this, SettingsActivity.class)); }
-        else if (id == R.id.liked_items) { startActivity(new Intent(this, LikedNewsActivity.class)); }
         return super.onOptionsItemSelected(item);
     }
 
@@ -233,31 +269,38 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> exe_rows = new ArrayList<>();
         try (InputStream inputStream = assetManager.open("sites_table.sql")) {
             Scanner scanner = new Scanner(inputStream);
-            while (scanner.hasNext()) { exe_rows.add(scanner.nextLine()); }
-        } catch (IOException ignored) {}
+            while (scanner.hasNext()) {
+                exe_rows.add(scanner.nextLine());
+            }
+        } catch (IOException ignored) {
+        }
         dataBaseHelper = new DataBaseHelper(getApplicationContext(), exe_rows);
         registerForContextMenu(listView);
         setDefaultSettings();
         if (!created) {
-        if (NewsRssItem.getNews().isEmpty()) { Snackbar.make(listView,
-                getString(R.string.str_net_exception), Snackbar.LENGTH_LONG).show(); }
-        else {
-            String message = getString(R.string.str_upload_news_data, NewsRssItem.getNews().size(),
-                    getApplicationContext().getResources().getQuantityString(R.plurals.items_plurals, NewsRssItem.getNews().size()),
-                    Site.getSites().size(),
-                    getResources().getQuantityString(R.plurals.sites_plurals, Site.getSites().size())
-            );
-            Snackbar.make(listView, message, Snackbar.LENGTH_LONG).show();
-        }
-        Collections.sort(NewsRssItem.getNews(), defaultComparator);
-        created = true;
+            if (NewsRssItem.getNews().isEmpty()) {
+                Snackbar.make(listView,
+                        getString(R.string.str_net_exception), Snackbar.LENGTH_LONG).show();
+            } else {
+                String message = getString(R.string.str_upload_news_data, NewsRssItem.getNews().size(),
+                        getApplicationContext().getResources().getQuantityString(R.plurals.items_plurals, NewsRssItem.getNews().size()),
+                        Site.getSites().size(),
+                        getResources().getQuantityString(R.plurals.sites_plurals, Site.getSites().size())
+                );
+                Snackbar.make(listView, message, Snackbar.LENGTH_LONG).show();
+            }
+            Collections.sort(NewsRssItem.getNews(), defaultComparator);
+            created = true;
         }
         NewsRssItem.getLikedNews().clear();
         StringBuilder xmlString = new StringBuilder();
         try (InputStream inputStream = openFileInput("news.xml")) {
             Scanner scanner = new Scanner(inputStream);
-            while (scanner.hasNext()) { xmlString.append(scanner.nextLine()); }
-        } catch (IOException ignored) {}
+            while (scanner.hasNext()) {
+                xmlString.append(scanner.nextLine());
+            }
+        } catch (IOException ignored) {
+        }
         org.jsoup.nodes.Document doc = Jsoup.parse(xmlString.toString(), "", Parser.xmlParser());
         Elements news = doc.select("item");
         for (org.jsoup.nodes.Element item : news) {
@@ -268,8 +311,14 @@ public class MainActivity extends AppCompatActivity {
                     item.select("image").text(), this);
             boolean notAgain = true;
             for (NewsRssItem it : NewsRssItem.getLikedNews()) {
-                if (it.isEqual(newsRssItem)) { notAgain = false; break; } }
-            if (notAgain) { NewsRssItem.getLikedNews().add(newsRssItem); }
+                if (it.isEqual(newsRssItem)) {
+                    notAgain = false;
+                    break;
+                }
+            }
+            if (notAgain) {
+                NewsRssItem.getLikedNews().add(newsRssItem);
+            }
         }
     }
 }

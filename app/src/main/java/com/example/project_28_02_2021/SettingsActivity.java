@@ -35,9 +35,9 @@ import static com.example.project_28_02_2021.PreferenceManager.SORT_BY_DATE;
 public class SettingsActivity extends AppCompatActivity {
 
     public static void setPreferenceState(SharedPreferences settings,
-                                   RadioGroup group,
-                                   String mode, HashMap<Integer, String> map,
-                                   String std_mode) {
+                                          RadioGroup group,
+                                          String mode, HashMap<Integer, String> map,
+                                          String std_mode) {
         Iterator<Integer> keyIterator = map.keySet().iterator();
         Iterator<String> valueIterator = map.values().iterator();
         while (valueIterator.hasNext() && keyIterator.hasNext()) {
@@ -46,7 +46,9 @@ public class SettingsActivity extends AppCompatActivity {
                 group.check(keyIterator.next());
                 hadNext = true;
             }
-            if (!hadNext) { keyIterator.next(); }
+            if (!hadNext) {
+                keyIterator.next();
+            }
         }
     }
 
@@ -55,7 +57,9 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         ActionBar bar = getSupportActionBar();
-        if (bar != null) { bar.setDisplayHomeAsUpEnabled(true); }
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
         SharedPreferences settings = getSharedPreferences(PreferenceManager.SETTINGS_NAME, MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = settings.edit();
         RadioGroup sortGroup = findViewById(R.id.sort_list);
@@ -86,9 +90,9 @@ public class SettingsActivity extends AppCompatActivity {
                         Collections.sort(NewsRssItem.getNews(),
                                 NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SITE));
                     } else if (checkedId == R.id.sort_by_size_button) {
-                      manager.setValueByKey(
-                              new PreferenceManager.PreferencePair(PreferenceManager.SORT_KEY, PreferenceManager.SORT_BY_SIZE)
-                      );
+                        manager.setValueByKey(
+                                new PreferenceManager.PreferencePair(PreferenceManager.SORT_KEY, PreferenceManager.SORT_BY_SIZE)
+                        );
                         Collections.sort(NewsRssItem.getNews(),
                                 NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SIZE));
                     }
@@ -97,8 +101,11 @@ public class SettingsActivity extends AppCompatActivity {
         RadioGroup.OnCheckedChangeListener modeChangeListener =
                 (group, checkedId) ->
                 {
-                    if (checkedId == R.id.none_filter) { editor.putString(PreferenceManager.FILTER_KEY, PreferenceManager.NONE_FILTER_MODE); }
-                    else if (checkedId == R.id.filter_tag) { editor.putString(PreferenceManager.FILTER_KEY, PreferenceManager.FILTER_MODE); }
+                    if (checkedId == R.id.none_filter) {
+                        editor.putString(PreferenceManager.FILTER_KEY, PreferenceManager.NONE_FILTER_MODE);
+                    } else if (checkedId == R.id.filter_tag) {
+                        editor.putString(PreferenceManager.FILTER_KEY, PreferenceManager.FILTER_MODE);
+                    }
                     editor.commit();
                 };
         sortGroup.setOnCheckedChangeListener(sortChangeListener);
@@ -111,10 +118,12 @@ public class SettingsActivity extends AppCompatActivity {
         TextWatcher watcher = new TextWatcher() {
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -141,18 +150,25 @@ public class SettingsActivity extends AppCompatActivity {
                     manager.setValueByKey(
                             new PreferenceManager.PreferencePair(PreferenceManager.FILTER_KEY, PreferenceManager.FILTER_MODE)
                     );
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         };
         String last_data = " ";
-        try { openFileOutput("tags.xml", MODE_APPEND); } catch (Exception ignored) {}
+        try {
+            openFileOutput("tags.xml", MODE_APPEND);
+        } catch (Exception ignored) {
+        }
         try (InputStream in_stream = openFileInput("tags.xml")) {
             StringBuilder tmp_str = new StringBuilder();
             Scanner in_scan = new Scanner(in_stream);
-            while (in_scan.hasNext()) { tmp_str.append(in_scan.next()); }
+            while (in_scan.hasNext()) {
+                tmp_str.append(in_scan.next());
+            }
             org.jsoup.nodes.Document doc = Jsoup.parse(tmp_str.toString(), " ", Parser.xmlParser());
             last_data = doc.select("tag").text();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         EditText text = findViewById(R.id.input_tags);
         text.setText(last_data);
         text.addTextChangedListener(watcher);

@@ -9,10 +9,19 @@ public class PreferenceManager {
 
     public static class PreferencePair {
         String key, value;
-        public PreferencePair(String key, String value)
-        { this.key = key; this.value = value; }
-        public String getKey()   { return key; }
-        public String getValue() { return value; }
+
+        public PreferencePair(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
 
     public PreferenceManager(Context context) {
@@ -22,8 +31,10 @@ public class PreferenceManager {
         editor.commit();
     }
 
-    public void setValueByKey(PreferencePair ...pairs) {
-        for (PreferencePair pair : pairs) { editor.putString(pair.getKey(), pair.getValue()); }
+    public void setValueByKey(PreferencePair... pairs) {
+        for (PreferencePair pair : pairs) {
+            editor.putString(pair.getKey(), pair.getValue());
+        }
         editor.apply();
         editor.commit();
     }

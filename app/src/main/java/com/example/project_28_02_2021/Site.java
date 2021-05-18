@@ -5,16 +5,16 @@ import android.content.Context;
 import java.util.ArrayList;
 
 public class Site {
-    private static final ArrayList<Site>        sites = new ArrayList<>();
-    private final String                        name;
-    private final String                        url;
-    private String                              imageLink = "";
-    private SiteStatusStates                    status = SiteStatusStates.UNFILLED_STATE;
-    private final Context                       context;
+    private static final ArrayList<Site> sites = new ArrayList<>();
+    private final String name;
+    private final String url;
+    private String imageLink = "";
+    private SiteStatusStates status = SiteStatusStates.UNFILLED_STATE;
+    private final Context context;
 
     public Site(String name, String url, Context context) {
-        this.name    = name;
-        this.url     = url;
+        this.name = name;
+        this.url = url;
         this.context = context;
     }
 
@@ -26,7 +26,11 @@ public class Site {
 
     public static class SiteFactory {
         public static Site getSiteByName(String name, Context context) {
-            for (Site site : sites) { if (site.name.equals(name)) { return site; } }
+            for (Site site : sites) {
+                if (site.name.equals(name)) {
+                    return site;
+                }
+            }
             return new Site(name, "?", context);
         }
     }
@@ -43,15 +47,39 @@ public class Site {
 
     public int getItemsCount() {
         int newsCount = 0;
-        for (NewsRssItem item : NewsRssItem.getNews()) { if (item.getSite() == this) { newsCount++; } }
+        for (NewsRssItem item : NewsRssItem.getNews()) {
+            if (item.getSite() == this) {
+                newsCount++;
+            }
+        }
         return newsCount;
     }
 
-    public static ArrayList<Site> getSites()        { return sites; }
-    public void setStatus(SiteStatusStates status)  { this.status = status; }
-    public String getName()                         { return name; }
-    public String getUrl()                          { return url; }
-    public void setImageLink(String imageLink)      { this.imageLink = imageLink; }
-    public String getImageLink()                    { return imageLink; }
-    public SiteStatusStates getStatus()             { return status; }
+    public static ArrayList<Site> getSites() {
+        return sites;
+    }
+
+    public void setStatus(SiteStatusStates status) {
+        this.status = status;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setImageLink(String imageLink) {
+        this.imageLink = imageLink;
+    }
+
+    public String getImageLink() {
+        return imageLink;
+    }
+
+    public SiteStatusStates getStatus() {
+        return status;
+    }
 }

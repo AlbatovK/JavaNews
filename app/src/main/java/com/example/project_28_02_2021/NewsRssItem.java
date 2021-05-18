@@ -13,23 +13,23 @@ import java.util.Locale;
 
 public class NewsRssItem {
 
-    private static final ArrayList<NewsRssItem> news          = new ArrayList<>();
-    private static final ArrayList<NewsRssItem> likedNews     = new ArrayList<>();
+    private static final ArrayList<NewsRssItem> news = new ArrayList<>();
+    private static final ArrayList<NewsRssItem> likedNews = new ArrayList<>();
 
-    private final Site                          site;
-    private final String                        link;
-    private final String                        title;
-    private final String                        urlImage;
-    private final HashSet<String>               categoryWords = new HashSet<>();
-    private final Context                       context;
-    private Date                                pubDate;
+    private final Site site;
+    private final String link;
+    private final String title;
+    private final String urlImage;
+    private final HashSet<String> categoryWords = new HashSet<>();
+    private final Context context;
+    private Date pubDate;
 
     public NewsRssItem(Site site, String link, String title,
                        String categoryData, String pubDate, String urlImage,
                        Context context) {
-        this.site    = site;
-        this.link    = link;
-        this.title   = title;
+        this.site = site;
+        this.link = link;
+        this.title = title;
         this.urlImage = urlImage;
         this.context = context;
 
@@ -48,7 +48,9 @@ public class NewsRssItem {
                         break;
                     }
                 }
-                if (!isValid) { continue; }
+                if (!isValid) {
+                    continue;
+                }
             }
             builder.append(letter);
         }
@@ -56,10 +58,16 @@ public class NewsRssItem {
         categoryWords.add(site.getName().trim().toLowerCase());
         String s_format_simple = "E, d MMM yyyy H:m:s z";
         String s_format_updated = "E MMM dd HH:mm:ss z yyyy";
-        try { this.pubDate = new SimpleDateFormat(s_format_simple, Locale.US).
-                    parse(pubDate); } catch (ParseException ignored) {
-            try { this.pubDate = new SimpleDateFormat(s_format_updated, Locale.US).
-                        parse(pubDate); } catch (ParseException anIgnored) { this.pubDate = new Date(System.currentTimeMillis()); }
+        try {
+            this.pubDate = new SimpleDateFormat(s_format_simple, Locale.US).
+                    parse(pubDate);
+        } catch (ParseException ignored) {
+            try {
+                this.pubDate = new SimpleDateFormat(s_format_updated, Locale.US).
+                        parse(pubDate);
+            } catch (ParseException anIgnored) {
+                this.pubDate = new Date(System.currentTimeMillis());
+            }
         }
     }
 
@@ -72,12 +80,18 @@ public class NewsRssItem {
     public static Comparator<NewsRssItem> getComparator(ItemComparators type) {
         Comparator<NewsRssItem> itemComparator = (n_1, n_2) -> 0;
         switch (type) {
-            case SORT_BY_SIZE: itemComparator = (n_1, n_2) ->
-                    Integer.compare(n_2.getTitle().length(), n_1.getTitle().length()); break;
-            case SORT_BY_SITE: itemComparator = (n_1, n_2) ->
-                    n_1.getSite().getName().compareToIgnoreCase(n_2.getSite().getName()); break;
-            case SORT_BY_DATE: itemComparator = (n_1, n_2) ->
-                    n_2.getDate().compareTo(n_1.getDate()); break;
+            case SORT_BY_SIZE:
+                itemComparator = (n_1, n_2) ->
+                        Integer.compare(n_2.getTitle().length(), n_1.getTitle().length());
+                break;
+            case SORT_BY_SITE:
+                itemComparator = (n_1, n_2) ->
+                        n_1.getSite().getName().compareToIgnoreCase(n_2.getSite().getName());
+                break;
+            case SORT_BY_DATE:
+                itemComparator = (n_1, n_2) ->
+                        n_2.getDate().compareTo(n_1.getDate());
+                break;
         }
         return itemComparator;
     }
@@ -109,12 +123,35 @@ public class NewsRssItem {
         return (item.getTitle().equals(title) && item.getSite().getName().equals(site.getName()));
     }
 
-    public Date getDate()                               { return pubDate; }
-    public String getUrlImage()                         { return urlImage; }
-    public static ArrayList<NewsRssItem> getNews()      { return news; }
-    public static ArrayList<NewsRssItem> getLikedNews() { return likedNews; }
-    public Site getSite()                               { return site; }
-    public HashSet<String> getCategoryWords()           { return categoryWords; }
-    public String getLink()                             { return link; }
-    public String getTitle()                            { return title; }
+    public Date getDate() {
+        return pubDate;
+    }
+
+    public String getUrlImage() {
+        return urlImage;
+    }
+
+    public static ArrayList<NewsRssItem> getNews() {
+        return news;
+    }
+
+    public static ArrayList<NewsRssItem> getLikedNews() {
+        return likedNews;
+    }
+
+    public Site getSite() {
+        return site;
+    }
+
+    public HashSet<String> getCategoryWords() {
+        return categoryWords;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public String getTitle() {
+        return title;
+    }
 }

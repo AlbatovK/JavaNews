@@ -22,7 +22,6 @@ class RssParser extends Thread {
 
     @Override
     public void run() {
-
         Thread loadThread = new Thread() {
             @Override
             public void run() {

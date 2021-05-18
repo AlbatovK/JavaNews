@@ -34,10 +34,10 @@ import javax.xml.transform.stream.StreamResult;
 
 public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
 
-    private final LayoutInflater    inflater;
-    private final int               layoutRes;
+    private final LayoutInflater inflater;
+    private final int layoutRes;
     private final List<NewsRssItem> items;
-    private final boolean           mainActivity;
+    private final boolean mainActivity;
 
     public NewsRssItemAdapter(Context context, int resource, List<NewsRssItem> items, boolean mainActivity) {
         super(context, resource, items);
@@ -48,8 +48,8 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
     }
 
     private static class ViewHolder {
-        final TextView  textView;
-        final TextView  dateView;
+        final TextView textView;
+        final TextView dateView;
         final ImageView share, delete, like;
         // final ImageView image;
 
@@ -70,7 +70,9 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
             convertView = inflater.inflate(layoutRes, parents, false);
             viewHolder = new ViewHolder(convertView);
             convertView.setTag(viewHolder);
-        } else { viewHolder = (ViewHolder) convertView.getTag(); }
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
         NewsRssItem item = items.get(pos);
         /*
         getContext().getAssets();
@@ -82,8 +84,16 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
             viewHolder.image.setImageResource(R.drawable.news_icon); }
         */
         boolean liked = false;
-        for (NewsRssItem likedItem : NewsRssItem.getLikedNews()) { if (likedItem.isEqual(item)) { liked = true; } }
-        if (liked) { viewHolder.like.setColorFilter(R.color.black); } else { viewHolder.like.clearColorFilter(); }
+        for (NewsRssItem likedItem : NewsRssItem.getLikedNews()) {
+            if (likedItem.isEqual(item)) {
+                liked = true;
+            }
+        }
+        if (liked) {
+            viewHolder.like.setColorFilter(R.color.black);
+        } else {
+            viewHolder.like.clearColorFilter();
+        }
         viewHolder.textView.setText(getContext().getString(R.string.str_adapter_add_data,
                 item.getTitle(), item.getSite().getName()));
         viewHolder.delete.clearColorFilter();
@@ -101,7 +111,8 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
                     try {
                         Thread.sleep(200);
                         viewHolder.share.clearColorFilter();
-                    } catch (InterruptedException ignored) {}
+                    } catch (InterruptedException ignored) {
+                    }
                 }
             };
             thread.start();
@@ -114,7 +125,8 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
                         Snackbar.make(finalConvertView, getContext().getString(R.string.str_already_liked),
                                 Snackbar.LENGTH_SHORT).show();
                         return;
-                    } }
+                    }
+                }
                 NewsRssItem.getLikedNews().add(item);
                 viewHolder.like.setColorFilter(R.color.black);
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -146,7 +158,8 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
                 transformer.transform(source, result);
                 Snackbar.make(finalConvertView, getContext().getString(R.string.str_liked_done),
                         Snackbar.LENGTH_SHORT).show();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
         viewHolder.delete.setOnClickListener(v -> {
             viewHolder.delete.setColorFilter(R.color.black);
@@ -159,7 +172,7 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
                     .setPositiveButton(R.string.str_delete_site, (dialog, which) -> {
                         if (mainActivity) {
                             try (OutputStream stream = getContext().openFileOutput("read.xml", Context.MODE_APPEND)) {
-                                Document document =  DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+                                Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
                                 Element rootElem = document.createElement("items");
                                 Element itemElem = document.createElement("item");
                                 Element nameElem = document.createElement("title");
@@ -180,32 +193,43 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
                                         transform(new DOMSource(document), new StreamResult(stream));
                                 this.remove(item);
                                 viewHolder.delete.clearColorFilter();
-                            } catch (Exception ignored) {}
+                            } catch (Exception ignored) {
+                            }
                         } else {
-                        StringBuilder gotXml = new StringBuilder();
-                        try (InputStream inputStream = getContext().openFileInput("news.xml")) {
-                            Scanner scanner = new Scanner(inputStream);
-                            while (scanner.hasNext()) { gotXml.append(scanner.nextLine()); }
-                        } catch (IOException ignored) {}
-                        getContext().deleteFile("news.xml");
-                        org.jsoup.nodes.Document doc = Jsoup.parse(gotXml.toString(), "", Parser.xmlParser());
-                        Elements items = doc.select("item");
-                        StringBuilder resXml = new StringBuilder();
-                        String root = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-                        String startTag = "<items>";
-                        String endTag = "</items>";
-                        try {for (org.jsoup.nodes.Element docItem : items) {
-                            if (docItem.select("title").text().equals(item.getTitle())) { continue; }
-                            resXml.append(docItem.toString()); }
-                        } catch (Exception ignored) {}
-                        String res = root + startTag + resXml.toString() + endTag;
-                        try { getContext().openFileOutput("news.xml", Context.MODE_APPEND).write(res.getBytes()); }
-                        catch (IOException ignored) {}
-                        NewsRssItem.getLikedNews().remove(item);
-                        this.remove(item);
-                        viewHolder.delete.clearColorFilter();
+                            StringBuilder gotXml = new StringBuilder();
+                            try (InputStream inputStream = getContext().openFileInput("news.xml")) {
+                                Scanner scanner = new Scanner(inputStream);
+                                while (scanner.hasNext()) {
+                                    gotXml.append(scanner.nextLine());
+                                }
+                            } catch (IOException ignored) {
+                            }
+                            getContext().deleteFile("news.xml");
+                            org.jsoup.nodes.Document doc = Jsoup.parse(gotXml.toString(), "", Parser.xmlParser());
+                            Elements items = doc.select("item");
+                            StringBuilder resXml = new StringBuilder();
+                            String root = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+                            String startTag = "<items>";
+                            String endTag = "</items>";
+                            try {
+                                for (org.jsoup.nodes.Element docItem : items) {
+                                    if (docItem.select("title").text().equals(item.getTitle())) {
+                                        continue;
+                                    }
+                                    resXml.append(docItem.toString());
+                                }
+                            } catch (Exception ignored) {
+                            }
+                            String res = root + startTag + resXml.toString() + endTag;
+                            try {
+                                getContext().openFileOutput("news.xml", Context.MODE_APPEND).write(res.getBytes());
+                            } catch (IOException ignored) {
+                            }
+                            NewsRssItem.getLikedNews().remove(item);
+                            this.remove(item);
+                            viewHolder.delete.clearColorFilter();
                         }
-                        })
+                    })
 
                     .create();
             alertDialog.show();

@@ -29,7 +29,9 @@ import java.util.Scanner;
 
 public class SendingWorker extends Worker {
 
-    public SendingWorker(Context context, WorkerParameters workerParams) { super(context, workerParams); }
+    public SendingWorker(Context context, WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
 
     @Override
     public Result doWork() {
@@ -37,13 +39,19 @@ public class SendingWorker extends Worker {
         ArrayList<String> exe_rows = new ArrayList<>();
         try (InputStream inputStream = assetManager.open("sites_table.sql")) {
             Scanner scanner = new Scanner(inputStream);
-            while (scanner.hasNext()) { exe_rows.add(scanner.nextLine()); }
-        } catch (IOException ignored) {}
+            while (scanner.hasNext()) {
+                exe_rows.add(scanner.nextLine());
+            }
+        } catch (IOException ignored) {
+        }
         assetManager.close();
         Log.println(Log.ASSERT, "MSG", exe_rows.toString());
         DataBaseHelper dataBaseHelper = new DataBaseHelper(getApplicationContext(), new ArrayList<>());
         dataBaseHelper.getReadableDatabase();
-        try { Thread.sleep(4000); } catch (Exception ignored) {}
+        try {
+            Thread.sleep(4000);
+        } catch (Exception ignored) {
+        }
         Log.println(Log.ASSERT, "MSG", dataBaseHelper.getSites().toString());
         ArrayList<Site> site_list = new ArrayList<>(dataBaseHelper.getSites());
 
@@ -71,13 +79,16 @@ public class SendingWorker extends Worker {
                             items.add(newsRssItem);
                         }
                     }
-                } catch (Exception e) { Log.println(Log.ASSERT, "MSG", e.getLocalizedMessage());}
+                } catch (Exception e) {
+                    Log.println(Log.ASSERT, "MSG", e.getLocalizedMessage());
+                }
             }
         };
         loadThread.start();
-        try { Thread.sleep(30000); } catch (InterruptedException ignored) {}
-
-
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException ignored) {
+        }
         NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(getApplicationContext());
         NotificationChannel channel = null;
@@ -88,7 +99,8 @@ public class SendingWorker extends Worker {
         }
         try {
             if (channel != null) notificationManager.createNotificationChannel(channel);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         Log.println(Log.ASSERT, items.get(0).getTitle() == null ? "Null" : "MSG", "!!!");
         Intent shareIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(items.get(0).getLink()));
         PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, shareIntent, PendingIntent.FLAG_UPDATE_CURRENT);

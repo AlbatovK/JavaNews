@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class DataBaseHelper extends SQLiteOpenHelper {
 
     protected final ArrayList<String> rows = new ArrayList<>();
-    protected final Context           context;
+    protected final Context context;
 
     public static String deleteQuery
             = "delete from sites_table where name = '%s';";
@@ -38,11 +38,14 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(createQuery);
-        for (String row : rows) { db.execSQL(row); }
+        for (String row : rows) {
+            db.execSQL(row);
+        }
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
 
     public ArrayList<Site> getSites() {
         Cursor cursor = getReadableDatabase().rawQuery(selectQuery, null);
@@ -54,14 +57,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             String url = cursor.getString(urlId);
             Site site = new Site(name, url, context);
             sites.add(site);
-            /* boolean notAgain = true;
-            for (Site s : Site.getSites()) {
-                if (site.getName().equals(s.getName())) {
-                    notAgain = false;
-                    break;
-                }
-            }
-            if (notAgain) { sites.add(site); } */
         }
         cursor.close();
         return sites;
