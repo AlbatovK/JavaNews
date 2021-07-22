@@ -1,4 +1,4 @@
-package com.example.project_28_02_2021;
+package com.example.project_28_02_2021.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +25,19 @@ import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.example.project_28_02_2021.notification.ConnectionWorker;
+import com.example.project_28_02_2021.rss.adapter.NewsRssItemAdapter;
+import com.example.project_28_02_2021.R;
+import com.example.project_28_02_2021.rss.ItemComparators;
+import com.example.project_28_02_2021.rss.NewsRssItem;
+import com.example.project_28_02_2021.rss.NewsRssItemManager;
+import com.example.project_28_02_2021.site.Site;
+import com.example.project_28_02_2021.site.SiteManager;
+import com.example.project_28_02_2021.site.SiteStatusStates;
+import com.example.project_28_02_2021.util.database.DataBaseHelper;
+import com.example.project_28_02_2021.util.settings.PreferenceManager;
+import com.example.project_28_02_2021.notification.SendingWorker;
+import com.example.project_28_02_2021.util.net.NetLoader;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.jsoup.Jsoup;
@@ -49,9 +63,10 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView = null;
     private SwipeRefreshLayout refreshLayout = null;
     private Comparator<NewsRssItem> defaultComparator = null;
-    private AdapterView.OnItemClickListener itemListener = (parent, view, position, id) -> {
-    };
+    private AdapterView.OnItemClickListener itemListener = (parent, view, position, id) -> { };
     private static boolean created = false;
+    private final NewsRssItemManager n_manager = NewsRssItemManager.getInstance();
+    private final SiteManager s_manager = SiteManager.getInstance(this, new ArrayList<>());
 
     private void setDefaultSettings() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -73,41 +88,47 @@ public class MainActivity extends AppCompatActivity {
                 if (!adapter.isEmpty()) {
                     adapter.clear();
                 }
-                if (!Site.getSites().isEmpty()) {
-                    Site.getSites().clear();
+                if (!s_manager.getSites().isEmpty()) {
+                    s_manager.getSites().clear();
                 }
-                if (!NewsRssItem.getNews().isEmpty()) {
-                    NewsRssItem.getNews().clear();
+                if (!n_manager.getNews().isEmpty()) {
+                    n_manager.getNews().clear();
                 }
                 dataBaseHelper.getReadableDatabase();
-                Site.getSites().addAll(dataBaseHelper.getSites());
-                for (Site site : Site.getSites()) {
-                    RssParser parser = new RssParser(site, this);
-                    parser.start();
+                s_manager.getSites().addAll(dataBaseHelper.getSites());
+                for (Site site : s_manager.getSites()) {
+                    NetLoader.loadFromSite(this, site);
                     try {
-                        while (site.getStatus() == Site.SiteStatusStates.UNFILLED_STATE) {
+                        while (site.getStatus() == SiteStatusStates.UNFILLED_STATE) {
                             Thread.sleep(100);
                         }
                     } catch (InterruptedException ignored) {
-                        site.setStatus(Site.SiteStatusStates.UNKNOWN_STATE);
+                        site.setStatus(SiteStatusStates.UNKNOWN_STATE);
                     }
                 }
-                if (NewsRssItem.getNews().isEmpty()) {
+                if (n_manager.getNews().isEmpty()) {
                     Snackbar.make(listView,
                             getString(R.string.str_net_exception), Snackbar.LENGTH_LONG).show();
+                    Log.d("!!!", "OK");
+                    PeriodicWorkRequest request
+                            = new PeriodicWorkRequest.Builder(ConnectionWorker.class,
+                            ConnectionWorker.interval_min,
+                            ConnectionWorker.time_unit).build();
+                    WorkManager manager = WorkManager.getInstance(getApplicationContext());
+                    manager.enqueueUniquePeriodicWork(ConnectionWorker.work_id, ExistingPeriodicWorkPolicy.KEEP, request);
                 } else {
-                    String message = getString(R.string.str_upload_news_data, NewsRssItem.getNews().size(),
-                            getApplicationContext().getResources().getQuantityString(R.plurals.items_plurals, NewsRssItem.getNews().size()),
-                            Site.getSites().size(),
-                            getResources().getQuantityString(R.plurals.sites_plurals, Site.getSites().size())
+                    String message = getString(R.string.str_upload_news_data, n_manager.getNews().size(),
+                            getApplicationContext().getResources().getQuantityString(R.plurals.items_plurals, n_manager.getNews().size()),
+                            s_manager.getSites().size(),
+                            getResources().getQuantityString(R.plurals.sites_plurals, s_manager.getSites().size())
                     );
                     Snackbar.make(listView, message, Snackbar.LENGTH_LONG).show();
                 }
-                Collections.sort(NewsRssItem.getNews(), defaultComparator);
+                Collections.sort(n_manager.getNews(), defaultComparator);
                 setDefaultSettings();
                 listView.post(() -> adapter.notifyDataSetChanged());
                 itemListener = (parent, view, position, id) -> startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse(NewsRssItem.getNews().get(position).getLink())));
+                        Uri.parse(n_manager.getNews().get(position).getLink())));
                 listView.post(() -> {
                     listView.setOnItemClickListener(itemListener);
                     setTitle(R.string.app_name);
@@ -120,22 +141,22 @@ public class MainActivity extends AppCompatActivity {
         refreshLayout.setOnRefreshListener(listener);
         switch (settings.getString(PreferenceManager.SORT_KEY, PreferenceManager.SORT_BY_DATE)) {
             case PreferenceManager.SORT_BY_DATE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_DATE);
+                defaultComparator = NewsRssItemManager.getComparator(ItemComparators.SORT_BY_DATE);
                 break;
             case PreferenceManager.SORT_BY_SITE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SITE);
+                defaultComparator = NewsRssItemManager.getComparator(ItemComparators.SORT_BY_SITE);
                 break;
             case PreferenceManager.SORT_BY_SIZE:
-                defaultComparator = NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SIZE);
+                defaultComparator = NewsRssItemManager.getComparator(ItemComparators.SORT_BY_SIZE);
                 break;
         }
-        Collections.sort(NewsRssItem.getNews(), defaultComparator);
+        Collections.sort(n_manager.getNews(), defaultComparator);
         if (settings.getString(PreferenceManager.FILTER_KEY,
                 PreferenceManager.NONE_FILTER_MODE).equals(PreferenceManager.NONE_FILTER_MODE)) {
-            adapter = new NewsRssItemAdapter(this, R.layout.list_item_layout, NewsRssItem.getNews(), true);
+            adapter = new NewsRssItemAdapter(this, R.layout.list_item_layout, n_manager.getNews(), true);
             listView.post(() -> listView.setAdapter(adapter));
             itemListener = (parent, view, position, id) -> startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse(NewsRssItem.getNews().get(position).getLink())));
+                    Uri.parse(n_manager.getNews().get(position).getLink())));
         } else {
             String[] tags = null;
             try {
@@ -155,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
             assert tags != null;
             ArrayList<NewsRssItem> filteredNews = new ArrayList<>();
-            for (NewsRssItem item : NewsRssItem.getNews()) {
+            for (NewsRssItem item : n_manager.getNews()) {
                 for (String tag : tags) {
                     String lower_tag = tag.toLowerCase().trim();
                     if (item.getCategoryWords().contains(lower_tag)) {
@@ -259,15 +280,11 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
-        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(SendingWorker.class, 15, TimeUnit.MINUTES).
-                setInitialDelay(15, TimeUnit.MINUTES).build();
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork("id_work", ExistingPeriodicWorkPolicy.REPLACE, request);
-
         listView = findViewById(R.id.list_view);
         refreshLayout = findViewById(R.id.swipe);
         AssetManager assetManager = getAssets();
         ArrayList<String> exe_rows = new ArrayList<>();
-        try (InputStream inputStream = assetManager.open("sites_table.sql")) {
+        try (InputStream inputStream = getAssets().open("sites_table.sql")) {
             Scanner scanner = new Scanner(inputStream);
             while (scanner.hasNext()) {
                 exe_rows.add(scanner.nextLine());
@@ -278,21 +295,28 @@ public class MainActivity extends AppCompatActivity {
         registerForContextMenu(listView);
         setDefaultSettings();
         if (!created) {
-            if (NewsRssItem.getNews().isEmpty()) {
+            if (n_manager.getNews().isEmpty()) {
                 Snackbar.make(listView,
                         getString(R.string.str_net_exception), Snackbar.LENGTH_LONG).show();
+                PeriodicWorkRequest request
+                        = new PeriodicWorkRequest.Builder(ConnectionWorker.class,
+                        ConnectionWorker.interval_min,
+                        ConnectionWorker.time_unit).build();
+                WorkManager manager = WorkManager.getInstance(getApplicationContext());
+                manager.enqueueUniquePeriodicWork(ConnectionWorker.work_id, ExistingPeriodicWorkPolicy.KEEP, request);
+
             } else {
-                String message = getString(R.string.str_upload_news_data, NewsRssItem.getNews().size(),
-                        getApplicationContext().getResources().getQuantityString(R.plurals.items_plurals, NewsRssItem.getNews().size()),
-                        Site.getSites().size(),
-                        getResources().getQuantityString(R.plurals.sites_plurals, Site.getSites().size())
+                String message = getString(R.string.str_upload_news_data, n_manager.getNews().size(),
+                        getApplicationContext().getResources().getQuantityString(R.plurals.items_plurals, n_manager.getNews().size()),
+                        s_manager.getSites().size(),
+                        getResources().getQuantityString(R.plurals.sites_plurals, s_manager.getSites().size())
                 );
                 Snackbar.make(listView, message, Snackbar.LENGTH_LONG).show();
             }
-            Collections.sort(NewsRssItem.getNews(), defaultComparator);
+            Collections.sort(n_manager.getNews(), defaultComparator);
             created = true;
         }
-        NewsRssItem.getLikedNews().clear();
+        n_manager.getLikedNews().clear();
         StringBuilder xmlString = new StringBuilder();
         try (InputStream inputStream = openFileInput("news.xml")) {
             Scanner scanner = new Scanner(inputStream);
@@ -305,19 +329,19 @@ public class MainActivity extends AppCompatActivity {
         Elements news = doc.select("item");
         for (org.jsoup.nodes.Element item : news) {
             NewsRssItem newsRssItem = new NewsRssItem(
-                    Site.SiteFactory.getSiteByName(item.select("site").text(), this),
+                    s_manager.getSiteByName(item.select("site").text(), this),
                     item.select("link").text(), item.select("title").text(),
                     "", item.select("pubDate").text(),
-                    item.select("image").text(), this);
+                    this);
             boolean notAgain = true;
-            for (NewsRssItem it : NewsRssItem.getLikedNews()) {
+            for (NewsRssItem it : n_manager.getLikedNews()) {
                 if (it.isEqual(newsRssItem)) {
                     notAgain = false;
                     break;
                 }
             }
             if (notAgain) {
-                NewsRssItem.getLikedNews().add(newsRssItem);
+                n_manager.getLikedNews().add(newsRssItem);
             }
         }
     }

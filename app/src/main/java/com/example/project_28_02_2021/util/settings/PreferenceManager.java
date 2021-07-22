@@ -1,4 +1,4 @@
-package com.example.project_28_02_2021;
+package com.example.project_28_02_2021.util.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,19 +8,13 @@ public class PreferenceManager {
     private final SharedPreferences.Editor editor;
 
     public static class PreferencePair {
-        String key, value;
-
+        final String key;
+        final String value;
+        public String getKey() { return key; }
+        public String getValue() { return value; }
         public PreferencePair(String key, String value) {
             this.key = key;
             this.value = value;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public String getValue() {
-            return value;
         }
     }
 
@@ -32,11 +26,17 @@ public class PreferenceManager {
     }
 
     public void setValueByKey(PreferencePair... pairs) {
-        for (PreferencePair pair : pairs) {
-            editor.putString(pair.getKey(), pair.getValue());
-        }
+        for (PreferencePair pair : pairs)
+            editor.putString(
+                    pair.getKey(), pair.getValue()
+            );
         editor.apply();
         editor.commit();
+    }
+
+    public String getString(String key, String def, Context context) {
+        SharedPreferences settings = context.getSharedPreferences(SETTINGS_NAME, Context.MODE_MULTI_PROCESS);
+        return settings.getString(key, def);
     }
 
     public final static String SETTINGS_NAME

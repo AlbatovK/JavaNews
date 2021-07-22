@@ -1,4 +1,4 @@
-package com.example.project_28_02_2021;
+package com.example.project_28_02_2021.rss.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,9 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.project_28_02_2021.R;
+import com.example.project_28_02_2021.rss.NewsRssItem;
+import com.example.project_28_02_2021.rss.NewsRssItemManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.jsoup.Jsoup;
@@ -51,7 +54,6 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
         final TextView textView;
         final TextView dateView;
         final ImageView share, delete, like;
-        // final ImageView image;
 
         public ViewHolder(View view) {
             textView = view.findViewById(R.id.item_text_view);
@@ -59,7 +61,6 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
             share = view.findViewById(R.id.share_button);
             delete = view.findViewById(R.id.delete_button);
             like = view.findViewById(R.id.like_button);
-            // image = view.findViewById(R.id.image_icon);
         }
     }
 
@@ -70,32 +71,18 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
             convertView = inflater.inflate(layoutRes, parents, false);
             viewHolder = new ViewHolder(convertView);
             convertView.setTag(viewHolder);
-        } else {
-            viewHolder = (ViewHolder) convertView.getTag();
-        }
+        } else { viewHolder = (ViewHolder) convertView.getTag(); }
         NewsRssItem item = items.get(pos);
-        /*
-        getContext().getAssets();
-        viewHolder.image.setImageResource(R.drawable.news_icon);
-        try { Picasso.with(getContext()).load(item.getUrlImage())
-                .error(R.drawable.news_icon)
-                .into(viewHolder.image);
-        } catch (Exception e) {
-            viewHolder.image.setImageResource(R.drawable.news_icon); }
-        */
         boolean liked = false;
-        for (NewsRssItem likedItem : NewsRssItem.getLikedNews()) {
-            if (likedItem.isEqual(item)) {
+        for (NewsRssItem likedItem : NewsRssItemManager.getInstance().getLikedNews())
+            if (likedItem.compareTo(item) == 0)
                 liked = true;
-            }
-        }
-        if (liked) {
-            viewHolder.like.setColorFilter(R.color.black);
-        } else {
-            viewHolder.like.clearColorFilter();
-        }
+        if (liked) { viewHolder.like.setColorFilter(R.color.black); }
+        else { viewHolder.like.clearColorFilter(); }
         viewHolder.textView.setText(getContext().getString(R.string.str_adapter_add_data,
-                item.getTitle(), item.getSite().getName()));
+                item.getTitle(),
+                item.getSite().getName())
+        );
         viewHolder.delete.clearColorFilter();
         viewHolder.dateView.setText(item.getRegexDate());
         viewHolder.share.setOnClickListener(v -> {
@@ -105,29 +92,25 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
             shareIntent.putExtra(Intent.EXTRA_TEXT, item.getLink());
             shareIntent.setType("text/plain");
             getContext().startActivity(shareIntent);
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(200);
-                        viewHolder.share.clearColorFilter();
-                    } catch (InterruptedException ignored) {
-                    }
-                }
+            Runnable sleep = () -> {
+              try { Thread.sleep(200); }
+              catch (Exception ignored) {}
+              viewHolder.share.clearColorFilter();
             };
-            thread.start();
+            Thread sleepThread = new Thread(sleep);
+            sleepThread.start();
         });
         View finalConvertView = convertView;
         viewHolder.like.setOnClickListener(v -> {
             try {
-                for (NewsRssItem loopItem : NewsRssItem.getLikedNews()) {
+                for (NewsRssItem loopItem : NewsRssItemManager.getInstance().getLikedNews()) {
                     if (loopItem.isEqual(item)) {
                         Snackbar.make(finalConvertView, getContext().getString(R.string.str_already_liked),
                                 Snackbar.LENGTH_SHORT).show();
                         return;
                     }
                 }
-                NewsRssItem.getLikedNews().add(item);
+                NewsRssItemManager.getInstance().getLikedNews().add(item);
                 viewHolder.like.setColorFilter(R.color.black);
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = factory.newDocumentBuilder();
@@ -142,13 +125,10 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
                 urlElem.appendChild(document.createTextNode(item.getLink()));
                 Element dateElem = document.createElement("pubDate");
                 dateElem.appendChild(document.createTextNode(item.getDate().toString()));
-                Element imageElement = document.createElement("image");
-                imageElement.appendChild(document.createTextNode(item.getUrlImage()));
                 itemElem.appendChild(nameElem);
                 itemElem.appendChild(siteElem);
                 itemElem.appendChild(urlElem);
                 itemElem.appendChild(dateElem);
-                itemElem.appendChild(imageElement);
                 rootElem.appendChild(itemElem);
                 document.appendChild(rootElem);
                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -225,7 +205,7 @@ public class NewsRssItemAdapter extends ArrayAdapter<NewsRssItem> {
                                 getContext().openFileOutput("news.xml", Context.MODE_APPEND).write(res.getBytes());
                             } catch (IOException ignored) {
                             }
-                            NewsRssItem.getLikedNews().remove(item);
+                            NewsRssItemManager.getInstance().getLikedNews().remove(item);
                             this.remove(item);
                             viewHolder.delete.clearColorFilter();
                         }

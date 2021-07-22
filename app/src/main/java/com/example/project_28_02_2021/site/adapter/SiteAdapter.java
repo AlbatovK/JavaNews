@@ -1,6 +1,5 @@
-package com.example.project_28_02_2021;
+package com.example.project_28_02_2021.site.adapter;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,9 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.project_28_02_2021.R;
+import com.example.project_28_02_2021.site.Site;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SiteAdapter extends ArrayAdapter<Site> {
@@ -40,17 +40,11 @@ public class SiteAdapter extends ArrayAdapter<Site> {
     }
 
     private void picIntoViewByLink(String link, ImageView view) {
-        if (!"Done".contentEquals(view.getContentDescription())) {
             Context context = getContext();
             context.getAssets();
             view.setImageResource(R.drawable.rss_icon);
-            try {
-                Picasso.with(context).load(link).error(R.drawable.rss_icon).into(view);
-            } catch (Exception e) {
-                view.setImageResource(R.drawable.rss_icon);
-            }
-            view.setContentDescription("Done");
-        }
+            try { Picasso.with(context).load(link).error(R.drawable.rss_icon).into(view); }
+            catch (Exception e) { view.setImageResource(R.drawable.rss_icon); }
     }
 
     @Override
@@ -60,38 +54,17 @@ public class SiteAdapter extends ArrayAdapter<Site> {
             convertView = inflater.inflate(layoutRes, parents, false);
             viewHolder = new SiteAdapter.ViewHolder(convertView);
             convertView.setTag(viewHolder);
-        } else {
-            viewHolder = (SiteAdapter.ViewHolder) convertView.getTag();
-        }
+        } else { viewHolder = (SiteAdapter.ViewHolder) convertView.getTag(); }
         Site item = items.get(pos);
         picIntoViewByLink(item.getImageLink(), viewHolder.site_icon);
-
         viewHolder.infoView.setText(item.asString());
-        viewHolder.quantity_view.setText(
-                getContext().getString(R.string.str_items_count,
-                        item.getItemsCount(),
-                        getContext().getResources().getQuantityString(R.plurals.items_plurals, item.getItemsCount()))
+        String plural = getContext().getResources().getQuantityString(
+                R.plurals.items_plurals,
+                item.getItemsCount()
         );
-        convertView.setOnLongClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            AlertDialog dialog = builder
-                    .setTitle(R.string.str_delete_full_site)
-                    .setMessage(getContext().getString(R.string.str_sure, item.getName()))
-                    .setPositiveButton(R.string.str_delete_site,
-                            (dialog1, which) -> {
-                                Site.getSites().remove(item);
-                                this.remove(item);
-                                DataBaseHelper helper = new DataBaseHelper(getContext(), new ArrayList<>());
-                                helper.getReadableDatabase();
-                                helper.deleteSite(item);
-                            }
-                    )
-                    .setNegativeButton(R.string.str_add_site_neg_button, (dialog12, which) -> {
-                    })
-                    .create();
-            dialog.show();
-            return true;
-        });
+        viewHolder.quantity_view.setText(
+                getContext().getString(R.string.str_items_count, item.getItemsCount(), plural)
+        );
         return convertView;
     }
 }

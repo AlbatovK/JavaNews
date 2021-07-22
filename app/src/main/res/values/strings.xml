@@ -65,4 +65,9 @@
     разрешение на автозапуск, а также на отображение на экране блокировки,
     отображение всплывающих окон в фоновом режиме, показ постоянных уведомлений.</string>
     <string name="str_ok">Ок</string>
+    <string name="str_connection_revived">Подключение восстановлено</string>
+    <string name="str_no_favorites">Избранные не содержат ни одной новости.</string>
+    <string name="str_footer">Нажмите, чтобы вернуться в начало.</string>
+    <string name="str_header">Добро пожаловать в избранное.\nНажмите, чтобы попасть в конец.</string>
+    <string name="str_empty_sites">База данных не содержит ни одного сайта.</string>
 </resources>

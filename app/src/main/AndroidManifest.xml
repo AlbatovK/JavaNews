@@ -22,31 +22,34 @@
         tools:ignore="AllowBackup"
         tools:targetApi="m">
 
-        <activity android:name=".SplashActivity">
+        <activity android:name=".activity.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".LikedNewsActivity"
+            android:name=".activity.LikedNewsActivity"
             android:label="@string/str_liked"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".activity.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
+
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activity.SettingsActivity"
             android:label="@string/title_activity_settings" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/str_main_page" />
-    </application>
 
+        <activity
+            android:name=".activity.MainActivity"
+            android:label="@string/str_main_page" />
+
+    </application>
 </manifest>

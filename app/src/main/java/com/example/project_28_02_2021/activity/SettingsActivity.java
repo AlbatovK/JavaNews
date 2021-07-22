@@ -1,6 +1,8 @@
-package com.example.project_28_02_2021;
+package com.example.project_28_02_2021.activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,12 +14,22 @@ import android.widget.RadioGroup;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.project_28_02_2021.R;
+import com.example.project_28_02_2021.rss.ItemComparators;
+import com.example.project_28_02_2021.rss.NewsRssItemManager;
+import com.example.project_28_02_2021.site.Site;
+import com.example.project_28_02_2021.site.SiteManager;
+import com.example.project_28_02_2021.site.adapter.SiteAdapter;
+import com.example.project_28_02_2021.util.files.FileManager;
+import com.example.project_28_02_2021.util.settings.PreferenceManager;
+
 import org.jsoup.Jsoup;
 import org.jsoup.parser.Parser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,7 +42,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import static com.example.project_28_02_2021.PreferenceManager.SORT_BY_DATE;
+import static com.example.project_28_02_2021.util.settings.PreferenceManager.SORT_BY_DATE;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -57,9 +69,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         ActionBar bar = getSupportActionBar();
-        if (bar != null) {
-            bar.setDisplayHomeAsUpEnabled(true);
-        }
+        if (bar != null) { bar.setDisplayHomeAsUpEnabled(true); }
         SharedPreferences settings = getSharedPreferences(PreferenceManager.SETTINGS_NAME, MODE_MULTI_PROCESS);
         SharedPreferences.Editor editor = settings.edit();
         RadioGroup sortGroup = findViewById(R.id.sort_list);
@@ -77,24 +87,25 @@ public class SettingsActivity extends AppCompatActivity {
                 (group, checkedId) ->
                 {
                     PreferenceManager manager = new PreferenceManager(this);
+                    NewsRssItemManager news_manager = NewsRssItemManager.getInstance();
                     if (checkedId == R.id.sort_by_date_button) {
                         manager.setValueByKey(
                                 new PreferenceManager.PreferencePair(PreferenceManager.SORT_KEY, PreferenceManager.SORT_BY_DATE)
                         );
-                        Collections.sort(NewsRssItem.getNews(),
-                                NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_DATE));
+                        Collections.sort(news_manager.getNews(),
+                                NewsRssItemManager.getComparator(ItemComparators.SORT_BY_DATE));
                     } else if (checkedId == R.id.sort_by_site_button) {
                         manager.setValueByKey(
                                 new PreferenceManager.PreferencePair(PreferenceManager.SORT_KEY, PreferenceManager.SORT_BY_SITE)
                         );
-                        Collections.sort(NewsRssItem.getNews(),
-                                NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SITE));
+                        Collections.sort(news_manager.getNews(),
+                                NewsRssItemManager.getComparator(ItemComparators.SORT_BY_SITE));
                     } else if (checkedId == R.id.sort_by_size_button) {
                         manager.setValueByKey(
                                 new PreferenceManager.PreferencePair(PreferenceManager.SORT_KEY, PreferenceManager.SORT_BY_SIZE)
                         );
-                        Collections.sort(NewsRssItem.getNews(),
-                                NewsRssItem.getComparator(NewsRssItem.ItemComparators.SORT_BY_SIZE));
+                        Collections.sort(news_manager.getNews(),
+                                NewsRssItemManager.getComparator(ItemComparators.SORT_BY_SIZE));
                     }
                     editor.apply();
                 };
@@ -112,7 +123,31 @@ public class SettingsActivity extends AppCompatActivity {
         modeGroup.setOnCheckedChangeListener(modeChangeListener);
         editor.commit();
         ListView sitesList = findViewById(R.id.site_settings_list);
-        SiteAdapter adapter = new SiteAdapter(this, R.layout.list_site_layout, Site.getSites());
+        sitesList.setEmptyView(findViewById(R.id.empty));
+        sitesList.setOnItemClickListener((parent, view, position, id) -> {
+            SiteManager manager = SiteManager.getInstance(this, new ArrayList<>());
+            Site item = manager.getSites().get(position);
+            final DialogInterface.OnClickListener pos_listener = (pos_dialog, which) -> {
+                manager.deleteSite(item);
+                SiteAdapter adapter = new SiteAdapter(
+                        this,
+                        R.layout.list_site_layout,
+                        manager.getSites()
+                );
+                sitesList.setAdapter(adapter);
+            };
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            AlertDialog dialog = builder
+                    .setTitle(R.string.str_delete_full_site)
+                    .setMessage(getString(R.string.str_sure, item.getName()))
+                    .setPositiveButton(R.string.str_delete_site, pos_listener)
+                    .setNegativeButton(R.string.str_add_site_neg_button, (neg_dialog, which) -> {} )
+                    .create();
+                dialog.show();
+        });
+        SiteAdapter adapter = new SiteAdapter(this,
+                R.layout.list_site_layout,
+                SiteManager.getInstance(this, new ArrayList<>()).getSites());
         sitesList.setAdapter(adapter);
         registerForContextMenu(sitesList);
         TextWatcher watcher = new TextWatcher() {
@@ -129,8 +164,8 @@ public class SettingsActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String[] tags = s.toString().split(",");
                 try {
-                    deleteFile("tags.xml");
-                    openFileOutput("tags.xml", MODE_APPEND);
+                    deleteFile(FileManager.tags_storage);
+                    openFileOutput(FileManager.tags_storage, MODE_APPEND);
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     DocumentBuilder builder = factory.newDocumentBuilder();
                     Document document = builder.newDocument();
@@ -144,7 +179,7 @@ public class SettingsActivity extends AppCompatActivity {
                     TransformerFactory transformerFactory = TransformerFactory.newInstance();
                     Transformer transformer = transformerFactory.newTransformer();
                     DOMSource source = new DOMSource(document);
-                    StreamResult result = new StreamResult(openFileOutput("tags.xml", Context.MODE_APPEND));
+                    StreamResult result = new StreamResult(openFileOutput(FileManager.tags_storage, Context.MODE_APPEND));
                     transformer.transform(source, result);
                     PreferenceManager manager = new PreferenceManager(getApplicationContext());
                     manager.setValueByKey(
@@ -156,10 +191,10 @@ public class SettingsActivity extends AppCompatActivity {
         };
         String last_data = " ";
         try {
-            openFileOutput("tags.xml", MODE_APPEND);
+            openFileOutput(FileManager.tags_storage, MODE_APPEND);
         } catch (Exception ignored) {
         }
-        try (InputStream in_stream = openFileInput("tags.xml")) {
+        try (InputStream in_stream = openFileInput(FileManager.tags_storage)) {
             StringBuilder tmp_str = new StringBuilder();
             Scanner in_scan = new Scanner(in_stream);
             while (in_scan.hasNext()) {
